@@ -4,15 +4,14 @@ import (
 	"html"
 	"net/http"
 
-	"github.com/amscotti/urlRedis/Godeps/_workspace/src/github.com/gorilla/mux"
 	"github.com/amscotti/urlRedis/storage"
+	"github.com/go-zoo/bone"
 )
 
 // RedirectKey return a http.Handler that redirects to the URL in the store
 func RedirectKey(store storage.Database) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		key := vars["key"]
+		key := bone.GetValue(r, "key")
 
 		status, err := store.Get(key)
 		if err != nil {

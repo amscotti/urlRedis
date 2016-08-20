@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/amscotti/urlRedis",
-	"GoVersion": "go1.5.1",
+	"GoVersion": "go1.7",
 	"Deps": [
 		{
 			"ImportPath": "github.com/garyburd/redigo/internal",
@@ -11,13 +11,9 @@
 			"Rev": "535138d7bcd717d6531c701ef5933d98b1866257"
 		},
 		{
-			"ImportPath": "github.com/gorilla/context",
-			"Rev": "1c83b3eabd45b6d76072b66b746c20815fb2872d"
-		},
-		{
-			"ImportPath": "github.com/gorilla/mux",
-			"Comment": "v1.1-21-gcf79e51",
-			"Rev": "cf79e51a62d8219d52060dfc1b4e810414ba2d15"
+			"ImportPath": "github.com/go-zoo/bone",
+			"Comment": "v1.1-31-g0237f0c",
+			"Rev": "0237f0c5455f175a6513e21afe050e128902dc7f"
 		}
 	]
 }

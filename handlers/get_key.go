@@ -4,15 +4,14 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/amscotti/urlRedis/Godeps/_workspace/src/github.com/gorilla/mux"
 	"github.com/amscotti/urlRedis/storage"
+	"github.com/go-zoo/bone"
 )
 
 // GetKey return a http.Handler that returns the key from storage
 func GetKey(store storage.Database) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		key := vars["key"]
+		key := bone.GetValue(r, "key")
 
 		status, err := store.Get(key)
 		if err != nil {
