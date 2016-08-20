@@ -4,8 +4,8 @@ import (
 	"html"
 	"net/http"
 
+	"github.com/amscotti/urlRedis/Godeps/_workspace/src/github.com/gorilla/mux"
 	"github.com/amscotti/urlRedis/storage"
-	"github.com/gorilla/mux"
 )
 
 // RedirectKey return a http.Handler that redirects to the URL in the store

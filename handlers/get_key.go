@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/amscotti/urlRedis/Godeps/_workspace/src/github.com/gorilla/mux"
 	"github.com/amscotti/urlRedis/storage"
-	"github.com/gorilla/mux"
 )
 
 // GetKey return a http.Handler that returns the key from storage
