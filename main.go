@@ -1,28 +1,27 @@
-package main
+package main // github.com:amscotti/urlRedis
 
 import (
 	"log"
 	"net/http"
 	"os"
-	"runtime"
 
 	"github.com/amscotti/urlRedis/handlers"
 	"github.com/amscotti/urlRedis/storage"
-	"github.com/go-zoo/bone"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
-	runtime.GOMAXPROCS(runtime.NumCPU())
 	db := storage.NewRedis()
 
-	router := bone.New()
-	router.Post("/", http.HandlerFunc(handlers.CreateKey(db)))
-	router.Get("/:key", http.HandlerFunc(handlers.RedirectKey(db)))
-	router.Get("/get/:key", http.HandlerFunc(handlers.GetKey(db)))
+	router := mux.NewRouter()
+	router.HandleFunc("/", handlers.CreateKey(db)).Methods("POST")
+	router.HandleFunc("/{key}", handlers.RedirectKey(db)).Methods("GET")
+	router.HandleFunc("/get/{key}", handlers.GetKey(db)).Methods("GET")
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = "8081"
 	}
 	log.Printf("Service started on port %s", port)
 	http.ListenAndServe(":"+port, router)

@@ -2,7 +2,7 @@
 A simple example of using Redis to make a URL shortener
 
 ## Dependencies
-* [redigo](http://github.com/garyburd/redigo)
+* [redigo](http://github.com/gomodule/redigo)
 * [bone](https://github.com/go-zoo/bone)
 
 ## Setup

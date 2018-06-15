@@ -3,9 +3,10 @@ package storage
 import (
 	"encoding/base64"
 	"fmt"
+	"os"
 	"strconv"
 
-	"github.com/garyburd/redigo/redis"
+	"github.com/gomodule/redigo/redis"
 )
 
 type redisDB struct {
@@ -23,7 +24,11 @@ func newPool() *redis.Pool {
 		MaxIdle:   80,
 		MaxActive: 12000, // max number of connections
 		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", ":6379")
+			redisURL := os.Getenv("REDIS_URL")
+			if redisURL == "" {
+				redisURL = ":6379"
+			}
+			c, err := redis.Dial("tcp", redisURL)
 			if err != nil {
 				panic(err.Error())
 			}
