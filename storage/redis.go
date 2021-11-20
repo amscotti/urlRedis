@@ -37,7 +37,7 @@ func newPool() *redis.Pool {
 	}
 }
 
-func (r *redisDB) getid() string {
+func (r *redisDB) getId() string {
 	c := r.pool.Get()
 	defer c.Close()
 	value, _ := redis.Int(c.Do("INCR", "IDCOUNT"))
@@ -66,7 +66,7 @@ func (r *redisDB) Set(url string) (status, error) {
 	c := r.pool.Get()
 	defer c.Close()
 
-	id := r.getid()
+	id := r.getId()
 
 	c.Do("SET", id, url)
 	return status{id, url, 0}, nil
