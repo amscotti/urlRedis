@@ -1,0 +1,14 @@
+services:
+  redis:
+    image: redis
+    expose:
+      - "6379"
+  web:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+    environment:
+      - PORT=8080
+      - REDIS_URL=redis:6379

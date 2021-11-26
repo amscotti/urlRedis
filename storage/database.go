@@ -9,8 +9,8 @@ type status struct {
 }
 
 var (
-	// ErrNotFound when key is not found in the store
-	ErrNotFound = errors.New("Not Found")
+	ErrNotFound = errors.New("not found")
+	DBConn      Database
 )
 
 // Database is an interface used for the backend for storing url and counts to a database

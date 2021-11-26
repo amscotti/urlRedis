@@ -1,71 +1,42 @@
 package handlers
 
 import (
-	"encoding/json"
 	"html"
-	"net/http"
 
 	"github.com/amscotti/urlRedis/storage"
-	"github.com/gorilla/mux"
+	"github.com/gofiber/fiber/v2"
 )
 
-// CreateKey return a http.Handler that write a new key to storage
-func CreateKey(store storage.Database) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		r.ParseForm()
+func CreateKey(c *fiber.Ctx) error {
+	url := c.FormValue("url")
 
-		status, err := store.Set(html.EscapeString(r.FormValue("url")))
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		json, err := json.Marshal(status)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(json)
+	status, err := storage.DBConn.Set(html.EscapeString(url))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
+
+	return c.JSON(status)
 }
 
-// GetKey return a http.Handler that returns the key from storage
-func GetKey(store storage.Database) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		key := vars["key"]
+func GetKey(c *fiber.Ctx) error {
+	key := c.Params("key")
 
-		status, err := store.Get(key)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusNotFound)
-			return
-		}
-
-		json, err := json.Marshal(status)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(json)
+	status, err := storage.DBConn.Get(key)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).SendString(err.Error())
 	}
+
+	return c.JSON(status)
 }
 
-// RedirectKey return a http.Handler that redirects to the URL in the store
-func RedirectKey(store storage.Database) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		key := vars["key"]
+func RedirectKey(c *fiber.Ctx) error {
+	key := c.Params("key")
 
-		status, err := store.Get(key)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusNotFound)
-		} else {
-			store.Incr(key)
-			http.Redirect(w, r, html.EscapeString(status.URL), 301)
-		}
+	status, err := storage.DBConn.Get(key)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).SendString(err.Error())
 	}
+
+	storage.DBConn.Incr(key)
+	return c.Redirect(html.EscapeString(status.URL))
 }

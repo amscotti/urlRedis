@@ -1,28 +1,43 @@
 package main // github.com:amscotti/urlRedis
 
 import (
-	"log"
-	"net/http"
 	"os"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 
 	"github.com/amscotti/urlRedis/handlers"
 	"github.com/amscotti/urlRedis/storage"
-
-	"github.com/gorilla/mux"
 )
 
-func main() {
-	db := storage.NewRedis()
+func initDatabase() {
+	redisURL := os.Getenv("REDIS_URL")
+	if redisURL == "" {
+		redisURL = ":6379"
+	}
+	storage.DBConn = storage.NewRedis(redisURL)
+}
 
-	router := mux.NewRouter()
-	router.HandleFunc("/", handlers.CreateKey(db)).Methods("POST")
-	router.HandleFunc("/{key}", handlers.RedirectKey(db)).Methods("GET")
-	router.HandleFunc("/get/{key}", handlers.GetKey(db)).Methods("GET")
+func setUpRoutes(app *fiber.App) {
+	keyRoutes := app.Group("/v1/keys")
+	keyRoutes.Post("/", handlers.CreateKey)
+	keyRoutes.Get(":key", handlers.GetKey)
+
+	app.Get("/:key", handlers.RedirectKey)
+}
+
+func main() {
+	app := fiber.New()
+
+	app.Use(logger.New())
+
+	initDatabase()
+	setUpRoutes(app)
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
-	log.Printf("Service started on port %s", port)
-	http.ListenAndServe(":"+port, router)
+
+	app.Listen(":" + port)
 }
