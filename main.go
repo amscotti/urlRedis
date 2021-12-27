@@ -3,6 +3,7 @@ package main // github.com:amscotti/urlRedis
 import (
 	"log"
 	"os"
+	"os/signal"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -27,6 +28,16 @@ func setUpRoutes(app *fiber.App) {
 	app.Get("/:key", handlers.RedirectKey)
 }
 
+func gracefulShutdown(app *fiber.App) {
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
+
+	<-quit
+
+	log.Println("Gracefully shutting down...")
+	_ = app.Shutdown()
+}
+
 func main() {
 	app := fiber.New()
 
@@ -39,6 +50,8 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
+
+	go func() { gracefulShutdown(app) }()
 
 	if err := app.Listen(":" + port); err != nil {
 		log.Fatal(err)
