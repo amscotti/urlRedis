@@ -8,7 +8,8 @@ RUN go mod download
 
 COPY . ./
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /urlRedis .
+ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
+RUN go build -ldflags="-s -w" -o /urlRedis .
 
 
 FROM scratch
