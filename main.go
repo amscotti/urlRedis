@@ -1,6 +1,7 @@
 package main // github.com:amscotti/urlRedis
 
 import (
+	"log"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
@@ -39,5 +40,7 @@ func main() {
 		port = "8080"
 	}
 
-	app.Listen(":" + port)
+	if err := app.Listen(":" + port); err != nil {
+		log.Fatal(err)
+	}
 }

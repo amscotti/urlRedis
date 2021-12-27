@@ -3,6 +3,7 @@ package storage
 import (
 	"encoding/base64"
 	"fmt"
+	"log"
 	"strconv"
 
 	"github.com/gomodule/redigo/redis"
@@ -65,7 +66,11 @@ func (r *redisDB) Set(url string) (status, error) {
 
 	id := r.getId()
 
-	c.Do("SET", id, url)
+	_, err := c.Do("SET", id, url)
+	if err != nil {
+		return status{}, ErrUnableToSet
+	}
+
 	return status{id, url, 0}, nil
 }
 
@@ -74,5 +79,8 @@ func (r *redisDB) Incr(key string) {
 	c := r.pool.Get()
 	defer c.Close()
 
-	c.Do("INCR", fmt.Sprintf("%q_COUNT", key))
+	_, err := c.Do("INCR", fmt.Sprintf("%q_COUNT", key))
+	if err != nil {
+		log.Print(err)
+	}
 }
