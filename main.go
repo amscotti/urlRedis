@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"syscall"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -28,14 +29,24 @@ func setUpRoutes(app *fiber.App) {
 	app.Get("/:key", handlers.RedirectKey)
 }
 
-func gracefulShutdown(app *fiber.App) {
+func gracefulShutdown(app *fiber.App) error {
 	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 
 	<-quit
 
 	log.Println("Gracefully shutting down...")
-	_ = app.Shutdown()
+	if err := app.Shutdown(); err != nil {
+		return err
+	}
+
+	log.Println("Running cleanup tasks...")
+	if err := storage.DBConn.Close(); err != nil {
+		return err
+	}
+
+	log.Println("Fiber was successful shutdown.")
+	return nil
 }
 
 func main() {
@@ -51,9 +62,16 @@ func main() {
 		port = "8080"
 	}
 
-	go func() { gracefulShutdown(app) }()
+	errs := make(chan error)
+	go func() {
+		if err := app.Listen(":" + port); err != nil {
+			errs <- err
+		}
+	}()
+	go func() { errs <- gracefulShutdown(app) }()
 
-	if err := app.Listen(":" + port); err != nil {
+	err := <-errs
+	if err != nil {
 		log.Fatal(err)
 	}
 }
