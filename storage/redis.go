@@ -84,3 +84,7 @@ func (r *redisDB) Incr(key string) {
 		log.Print(err)
 	}
 }
+
+func (r *redisDB) Close() error {
+	return r.pool.Close()
+}

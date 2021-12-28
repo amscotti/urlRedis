@@ -19,4 +19,5 @@ type Database interface {
 	Get(key string) (status, error)
 	Set(url string) (status, error)
 	Incr(Key string)
+	Close() error
 }
